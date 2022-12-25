@@ -198,6 +198,7 @@ def acs():
     u'''The location where the SAML assertion is sent with a HTTP POST.
     This is often referred to as the SAML Assertion Consumer Service (ACS) URL.
     '''
+    breakpoint()
     g.user = None
     g.userobj = None
 
@@ -256,7 +257,7 @@ def acs():
 
     g.userobj = model.User.by_name(g.user)
 
-    relay_state = request.form.get('RelayState')
+    relay_state = request.form.get('RelayState', None)
     redirect_target = toolkit.url_for(
         relay_state, _external=True) if relay_state else config.get(
             'ckanext.saml2auth.default_fallback_endpoint', 'user.me')
@@ -283,10 +284,11 @@ def saml2login():
     u'''Redirects the user to the
      configured identity provider for authentication
     '''
+    breakpoint()
+
     client = h.saml_client(sp_config())
     requested_authn_contexts = _get_requested_authn_contexts()
     relay_state = toolkit.request.args.get('came_from', '')
-
     if len(requested_authn_contexts) > 0:
         comparison = config.get('ckanext.saml2auth.requested_authn_context_comparison',
                                 'minimum')
@@ -298,11 +300,9 @@ def saml2login():
             class_ref=requested_authn_contexts,
             comparison=comparison
         )
-
         reqid, info = client.prepare_for_authenticate(requested_authn_context=final_context, relay_state=relay_state)
     else:
         reqid, info = client.prepare_for_authenticate(relay_state=relay_state)
-
     redirect_url = None
     for key, value in info[u'headers']:
         if key == u'Location':
@@ -328,7 +328,7 @@ def slo():
     return toolkit.redirect_to(u'user.logout')
 
 
-acs_endpoint = config.get('ckanext.saml2auth.acs_endpoint', '/acs')
+acs_endpoint = config.get('ckanext.saml2auth.acs_endpoint', '/acs/post')
 saml2auth.add_url_rule(acs_endpoint, view_func=acs, methods=[u'GET', u'POST'])
 saml2auth.add_url_rule(u'/user/saml2login', view_func=saml2login)
 if not h.is_default_login_enabled():

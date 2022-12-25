@@ -97,6 +97,10 @@ class Saml2AuthPlugin(plugins.SingletonPlugin):
 
     def logout(self):
 
+        # Configutrable logout endpoint
+        if toolkit.config.get('ckanext.saml2auth.default_logout', False):
+            pass
+
         response = _perform_slo()
 
         if response:
@@ -157,7 +161,6 @@ def _perform_slo():
                 response = make_response(
                     base.render(u'saml2auth/idp_logout.html', extra_vars)
                 )
-
             elif binding == entity.BINDING_HTTP_REDIRECT:
                 log.debug(
                     'Redirecting to the IdP to continue the logout process')
