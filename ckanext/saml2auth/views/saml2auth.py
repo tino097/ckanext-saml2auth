@@ -198,7 +198,6 @@ def acs():
     u'''The location where the SAML assertion is sent with a HTTP POST.
     This is often referred to as the SAML Assertion Consumer Service (ACS) URL.
     '''
-    breakpoint()
     g.user = None
     g.userobj = None
 
@@ -284,8 +283,7 @@ def saml2login():
     u'''Redirects the user to the
      configured identity provider for authentication
     '''
-    breakpoint()
-
+    
     client = h.saml_client(sp_config())
     requested_authn_contexts = _get_requested_authn_contexts()
     relay_state = toolkit.request.args.get('came_from', '')
@@ -307,6 +305,8 @@ def saml2login():
     for key, value in info[u'headers']:
         if key == u'Location':
             redirect_url = value
+    log.debug(u'Redirecting to IdP for authentication')
+    log.debug(u'Redirecting to {}'.format(redirect_url))
     return toolkit.redirect_to(redirect_url)
 
 
