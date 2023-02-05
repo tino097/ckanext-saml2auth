@@ -198,6 +198,7 @@ def acs():
     u'''The location where the SAML assertion is sent with a HTTP POST.
     This is often referred to as the SAML Assertion Consumer Service (ACS) URL.
     '''
+    breakpoint()
     g.user = None
     g.userobj = None
 
@@ -327,10 +328,10 @@ def slo():
     '''
     return toolkit.redirect_to(u'user.logout')
 
-
 acs_endpoint = config.get('ckanext.saml2auth.acs_endpoint', '/acs/post')
 saml2auth.add_url_rule(acs_endpoint, view_func=acs, methods=[u'GET', u'POST'])
 saml2auth.add_url_rule(u'/user/saml2login', view_func=saml2login)
+
 if not h.is_default_login_enabled():
     saml2auth.add_url_rule(
         u'/user/login', view_func=disable_default_login_register)

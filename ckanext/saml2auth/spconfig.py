@@ -62,38 +62,6 @@ def get_config():
     logout_expected_binding = ckan_config.get(u'ckanext.saml2auth.logout_expected_binding',
                                               entity.BINDING_HTTP_POST)
 
-    # config = {
-    #     u'entityid': entity_id,
-    #     u'description': u'CKAN saml2 Service Provider',
-    #     # Set True if eg.Azure or Microsoft Idp used
-    #     u'allow_unknown_attributes': allow_unknown_attributes,
-    #     u'service': {
-    #         u'sp': {
-    #             u'name': u'CKAN SP',
-    #             u'endpoints': {
-    #                 u'assertion_consumer_service': [base + acs_endpoint]
-    #             },
-    #             u'allow_unsolicited': False,
-    #             u'authn_requests_signed': True,
-    #             u'name_id_format': name_id_format,
-    #             u'want_response_signed': False,
-    #             u'want_assertions_signed': False,
-    #             u'want_assertions_or_response_signed': any_signed,
-    #             u'logout_requests_signed': False
-    #             },
-    #             u"requested_authn_context": {
-    #                 "authn_context_class_ref": [
-    #                     "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport",
-    #                     "urn:oasis:names:tc:SAML:2.0:ac:classes:TLSClient"],
-    #             u"comparison": "minimum",
-    #     }
-    #         },
-    #     u'logout_expected_binding': logout_expected_binding,
-    #     u'metadata': {},
-    #     u'debug': 1 if debug else 0,
-    #     u'name_form': NAME_FORMAT_URI
-    #     }
-
     config = {
     "entityid": "urn:mace:umu.se:saml:ckan:sp",
     "description":"CKAN saml2 Service Provider",
@@ -112,13 +80,14 @@ def get_config():
             "want_response_signed": False,
             "authn_requests_signed": False,
             "logout_requests_signed": False,
+            "allow_unsolicited": True,
             "required_attributes": [
                 "mail", "sn", "givenName", "displayName", "isMemberOf",
             ],
             "attribute_map_dir": "attributesmaps",
             "endpoints": {
                 "assertion_consumer_service": [
-                    ("http://localhost:5000/acs/redirect", entity.BINDING_HTTP_REDIRECT)
+                    ("http://localhost:5000/acs/post", entity.BINDING_HTTP_POST)
         #####            ("%s/acs/post" % BASE, BINDING_HTTP_POST)
                         ],
                     }
