@@ -198,7 +198,6 @@ def acs():
     u'''The location where the SAML assertion is sent with a HTTP POST.
     This is often referred to as the SAML Assertion Consumer Service (ACS) URL.
     '''
-    breakpoint()
     g.user = None
     g.userobj = None
 

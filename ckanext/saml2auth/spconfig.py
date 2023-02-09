@@ -94,6 +94,7 @@ def get_config():
 
                 },
             },
+            "logout_expected_binding": logout_expected_binding, 
             "metadata": {"local": [
             "idp.xml"
             ]},
