@@ -218,6 +218,13 @@ def acs():
         auth_response = client.parse_authn_request_response(
             saml_response,
             entity.BINDING_HTTP_POST)
+        allow_unsolicited = client.config.getattr("allow_unsolicited")
+        if not allow_unsolicited:
+            req_id = authn_response.in_response_to
+            if req_id != session.get('saml2auth_request_id', None):
+                raise RuntimeError("SAML request/response IDs do not match")
+            else:
+                session.pop('saml2auth_request_id')
     except Exception as e:
         error = 'Bad login request: {}'.format(e)
     else:
@@ -301,6 +308,11 @@ def saml2login():
         reqid, info = client.prepare_for_authenticate(requested_authn_context=final_context, relay_state=relay_state)
     else:
         reqid, info = client.prepare_for_authenticate(relay_state=relay_state)
+
+    allow_unsolicited = client.config.getattr("allow_unsolicited")
+    if not allow_unsolicited:
+        session['saml2auth_request_id'] = reqid
+
     redirect_url = None
     for key, value in info[u'headers']:
         if key == u'Location':
