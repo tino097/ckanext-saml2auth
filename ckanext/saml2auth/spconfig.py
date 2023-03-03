@@ -87,7 +87,7 @@ def get_config():
             "attribute_map_dir": "attributesmaps",
             "endpoints": {
                 "assertion_consumer_service": [
-                    ("http://localhost:8443/acs/post", entity.BINDING_HTTP_POST)
+                    ("http://localhost:5000/acs/post", entity.BINDING_HTTP_POST)
         #####            ("%s/acs/post" % BASE, BINDING_HTTP_POST)
                         ],
                     }

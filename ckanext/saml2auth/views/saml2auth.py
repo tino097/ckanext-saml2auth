@@ -21,6 +21,7 @@ import logging
 import copy
 
 from flask import Blueprint, session
+import saml2
 from saml2 import entity
 from saml2.authn_context import requested_authn_context
 
@@ -30,7 +31,7 @@ import ckan.plugins as plugins
 import ckan.lib.dictization.model_dictize as model_dictize
 from ckan.lib import base
 from ckan.views.user import set_repoze_user
-from ckan.common import config, g, request
+from ckan.common import config, g, request, session as ckan_session
 
 from ckanext.saml2auth.spconfig import get_config as sp_config
 from ckanext.saml2auth import helpers as h
@@ -214,17 +215,23 @@ def acs():
     saml_response = request.form.get(u'SAMLResponse', None)
 
     error = None
+
     try:
+        allow_unsolicited = client.config.getattr("allow_unsolicited")
         auth_response = client.parse_authn_request_response(
             saml_response,
             entity.BINDING_HTTP_POST)
-        allow_unsolicited = client.config.getattr("allow_unsolicited")
-        if not allow_unsolicited:
-            req_id = authn_response.in_response_to
-            if req_id != session.get('saml2auth_request_id', None):
-                raise RuntimeError("SAML request/response IDs do not match")
-            else:
-                session.pop('saml2auth_request_id')
+        
+        # if not allow_unsolicited:
+        #     req_id = auth_response.in_response_to
+        #     breakpoint()
+        #     if req_id != session.get('saml2auth_request_id', None):
+        #         raise RuntimeError("SAML request/response IDs do not match")
+        #     else:
+        #         ckan_session.pop('saml2auth_request_id')
+    except saml2.response.UnsolicitedResponse as e:
+        error = 'Unsolicited SAML response: {}'.format(e)
+
     except Exception as e:
         error = 'Bad login request: {}'.format(e)
     else:
@@ -310,8 +317,9 @@ def saml2login():
         reqid, info = client.prepare_for_authenticate(relay_state=relay_state)
 
     allow_unsolicited = client.config.getattr("allow_unsolicited")
-    if not allow_unsolicited:
-        session['saml2auth_request_id'] = reqid
+    # breakpoint()
+    # session['saml2auth_request_id'] = reqid
+    # session.modified = True
 
     redirect_url = None
     for key, value in info[u'headers']:
