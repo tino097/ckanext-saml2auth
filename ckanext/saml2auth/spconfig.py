@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from saml2.saml import NAME_FORMAT_URI
 from saml2 import entity
-import saml2
 
 from ckan.common import config as ckan_config
 from ckan.common import asbool, aslist
@@ -61,45 +60,33 @@ def get_config():
         asbool(ckan_config.get(u'ckanext.saml2auth.logout_requests_signed', False))
     logout_expected_binding = ckan_config.get(u'ckanext.saml2auth.logout_expected_binding',
                                               entity.BINDING_HTTP_POST)
+    allow_unsolicited = ckan_config.get(u'ckanext.saml2auth.allow_unsolicited', False),
+    required_attributes = ckan_config.get(u'ckanext.saml2auth.required_attributes', None),
 
     config = {
-    "entityid": "urn:mace:umu.se:saml:ckan:sp",
-    "description":"CKAN saml2 Service Provider",
-    "service": {
-        "sp": {
-            "name":"CKAN SP",
-            "required_attributes": [
-              "surname",
-              "givenName",
-              "mail",
-            ],
-            "name_id_format":[
-              "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"
-            ],
-
-            "want_response_signed": False,
-            "authn_requests_signed": False,
-            "logout_requests_signed": False,
-            "allow_unsolicited": True,
-            "required_attributes": [
-                "mail", "sn", "givenName", "displayName", "isMemberOf",
-            ],
-            "attribute_map_dir": "attributesmaps",
-            "endpoints": {
-                "assertion_consumer_service": [
-                    ("http://localhost:5000/acs/post", entity.BINDING_HTTP_POST)
-        #####            ("%s/acs/post" % BASE, BINDING_HTTP_POST)
-                        ],
-                    }
-
+        u'entityid': entity_id,
+        u'description': u'CKAN saml2 Service Provider',
+        # Set True if eg.Azure or Microsoft Idp used
+        u'allow_unknown_attributes': allow_unknown_attributes,
+        u'service': {
+            u'sp': {
+                u'name': u'CKAN SP',
+                u'endpoints': {
+                    u'assertion_consumer_service': [base + acs_endpoint]
                 },
-            },
-            "logout_expected_binding": logout_expected_binding, 
-            "metadata": {"local": [
-            "idp.xml"
-            ]},
-            "debug":0,
-            "name_form": NAME_FORMAT_URI,
+                u'allow_unsolicited': True,
+                u'required_attributes':  required_attributes,
+                u'name_id_format': name_id_format,
+                u'want_response_signed': response_signed,
+                u'want_assertions_signed': assertion_signed,
+                u'want_assertions_or_response_signed': any_signed,
+                u'logout_requests_signed': logout_requests_signed
+            }
+        },
+        u'logout_expected_binding': logout_expected_binding,
+        u'metadata': {},
+        u'debug': 1 if debug else 0,
+        u'name_form': NAME_FORMAT_URI
         }
 
     if name_id_policy_format:
@@ -121,7 +108,7 @@ def get_config():
                 u'cert': remote_cert
             }]
         config[u'metadata'][u'remote'] = remote
-    
-    print(config)
 
     return config
+
+
